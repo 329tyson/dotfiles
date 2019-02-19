@@ -886,7 +886,8 @@ endfunction
 command! -nargs=0 F call s:fzf_smart()
 
 " Invoke F (FZF) Using Ctrl-P
-nmap <C-P> :F<CR>
+"nmap <C-P> :F<CR>
+nmap <C-P> :GitFiles<CR>
 
 " insert mode completion
 imap <c-x><c-k>   <plug>(fzf-complete-word)
@@ -1310,3 +1311,5 @@ nnoremap <leader>wq :wqa<CR>
 " <C-r><C-w> pastes word with cursor-on
 nnoremap <leader>s :%s/\<<C-r><C-w>\>/
 nnoremap <leader>vs :%s/\%V
+nnoremap <leader>bd :bd<CR>
+command Diff execute 'w !git diff --no-index % -'
