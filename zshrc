@@ -127,12 +127,12 @@ alias pt='source $HOME/.pytorch/bin/activate'
 alias de='deactivate'
 alias cde='conda deactivate'
 alias s='ls'
-alias clean='rm -rf logs/*;rm -rf runs/*'
 alias va='_open_ext '
 alias ra='_remove_ext '
 alias max='_findmax'
 alias sl='ls'
 alias ll='ls -l'
+alias clear_log='_clear_logs_less_than'
 
 bindkey '^E' fzf-cd-widget
 
@@ -161,10 +161,42 @@ function _remove_ext {
 function _findmax {
     ag Validation "$@" | cut -d : -f 2,3 | cut -d : -f 2 | cut -d , -f 1 | sort -V -r | head -n1
 }
+function _clear_logs_less_than {
+    for f in *.log; do
+        count=$(wc -l ${f} | cut -f 1 -d ' ')
+        if [ ${count} -lt $1 ] 
+        then
+            rm -rf ${f}
+        fi
+    done
+}
+function recent {
+    linenum=1
+    while getopts "n:" opt; do
+        case ${opt} in
+            "n")
+                linenum=${OPTARG}
+                ;;
+            *)
+                #echo Invalid args!
+                #return
+                linenum=1
+                ;;
+        esac
+    done
+    for f in $(ls -t1 | head -n ${linenum}); do
+        print ${f}
+        max ${f}
+    done
+    print 'press anything to edit above files: \n'
+    read n
+    vim $(ls -t1 | head -n${linenum})
+}
 zle -N _open_ext
 zle -N _git_status
 zle -N _remove_ext
 zle -N _see_log
 zle -N _findmax
+zle -N recent
 
 bindkey '^S' _git_status

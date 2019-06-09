@@ -546,7 +546,7 @@ call s:auto_termguicolors()
 
 
 " apply base theme
-silent! colorscheme xoria256
+" silent! colorscheme xoria256
 
 " airline theme: status line and tab line
 if has("termguicolors") && &termguicolors
@@ -1389,6 +1389,10 @@ endif
 " custom vim settings
 "let g:airline_theme='triplejelly'
 :colorscheme monokai-phoenix
+":colorscheme kiss
+":colorscheme dracula
+":colorscheme xoria256
+":colorscheme gruvbox
 autocmd BufRead *.py setlocal colorcolumn=0
 autocmd FileType python setlocal foldmethod=indent
 nnoremap <leader>q :qa<CR>
@@ -1400,8 +1404,11 @@ nnoremap <leader>bd :bd<CR>
 nnoremap <leader>e :e
 nnoremap ff /
 inoremap { {}<Esc>i
+inoremap {} {}<Esc>a
+inoremap () ()<Esc>a
 inoremap {<Space> {}<Right>
 inoremap ( ()<Esc>i
+inoremap (<Space> ()<Right>
 inoremap (<CR> ()<Esc>o
 set foldmethod=indent
 set nofoldenable
