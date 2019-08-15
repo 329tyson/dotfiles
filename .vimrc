@@ -1,1 +1,0 @@
-/home/tyson/.dotfiles/vim/vimrc

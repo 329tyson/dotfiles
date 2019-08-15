@@ -1,1 +1,0 @@
-/home/tyson/.dotfiles/zsh/zshrc

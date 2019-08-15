@@ -13,8 +13,10 @@ scriptencoding utf-8
 " listed up in the separate file 'plugins.vim'.
 " It is for making this vimrc could also work out-of-box
 " even if not managed by dotfiles.
-if filereadable(expand("\~/.vim/plugins.vim"))
+if filereadable(expand('~/.vim/plugins.vim'))
     source \~/.vim/plugins.vim
+else
+    let g:plugs = {}
 endif
 
 " Automatically install missing plugins on startup
@@ -40,7 +42,7 @@ endif
 set runtimepath+=~/.vim
 
 " add ~/.local/bin to $PATH
-let $PATH .= ":" . expand("\~/.local/bin")
+let $PATH .= ':' . expand('~/.local/bin')
 
 " load plugins with pathogen
 try
@@ -54,7 +56,7 @@ set number                  " show line numbers
 set ruler
 
 " input settings
-set bs=indent,eol,start     " allow backspaces over everything
+set backspace=indent,eol,start     " allow backspaces over everything
 set autoindent
 set smartindent
 set pastetoggle=<F8>
@@ -91,6 +93,11 @@ set expandtab
 " listchars for whitespaces
 set list
 set listchars=tab:»\ ,trail:·,extends:>,precedes:<
+
+augroup listchars_filetype
+  autocmd!
+  autocmd FileType GV setlocal listchars-=trail:·
+augroup END
 
 " wildmenu settings
 set wildmenu
@@ -141,6 +148,13 @@ set history=1000
 set undolevels=1000
 set lazyredraw              " no redrawing during macro execution
 
+" Make gitgutter signs, etc. be more responsive (default is 4000ms)
+set updatetime=200
+
+set matchpairs+=<:>
+" Make gitgutter signs, etc. be more responsive (default is 4000ms)
+set updatetime=200
+
 set mps+=<:>
 
 " when launching files via quickfix, FZF, or something else,
@@ -152,7 +166,7 @@ set switchbuf+=usetab,split
 set diffopt+=iwhite
 
 " jump to the last position when reopening a file
-if has("autocmd")
+if has('autocmd')
   let s:last_position_disable_filetypes = ['gitcommit']
   au BufReadPost * if index(s:last_position_disable_filetypes, &ft) < 0 && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"zz" | endif
 endif
@@ -181,8 +195,8 @@ endif
 
 " the leader key
 " (NOTE) leader key is mapped to vim-which-key, see sections below
-let mapleader=","           " comma is the <Leader> key.
-let maplocalleader=","      " comma : <LocalLeader>
+let mapleader=','           " comma is the <Leader> key.
+let maplocalleader=','      " comma : <LocalLeader>
 
 inoremap <silent> <C-k> <ESC>:update<CR>
 
@@ -256,6 +270,8 @@ endif
 " Buffer navigations
 nnoremap [b  :bprevious<CR>
 nnoremap ]b  :bnext<CR>
+map <C-]> ]b
+map <C-[> [b
 if has('nvim')
   nnoremap <silent> [b <C-\><C-n>:bprevious<CR>
   nnoremap <silent> ]b <C-\><C-n>:bnext<CR>
@@ -328,7 +344,7 @@ endif
 function! s:run_make(bang)
     let l:silent_filetypes = ['tex', 'pandoc', 'lilypond']
     " (1) bang given, force background
-    if a:bang == "!" | TheMake!
+    if a:bang ==# '!' | TheMake!
     " (2) for specified filetypes, use background
     elseif index(l:silent_filetypes, &filetype) >= 0 | TheMake!
     " (3) otherwise, make with foreground shown
@@ -363,9 +379,9 @@ map <leader>m <F5>
 
 " <F6>: show/close quickfix window (scroll bottom)
 function! QuickfixToggle()
-  let nr = winnr("$")
+  let nr = winnr('$')
   :TheCopen
-  let nr2 = winnr("$")
+  let nr2 = winnr('$')
   if nr == nr2 | cclose | endif
 endfunction
 map  <silent> <F6> :call QuickfixToggle()<CR>
@@ -373,9 +389,9 @@ imap <silent> <F6> <ESC>:call QuickfixToggle()<CR>G:wincmd w<CR>a
 
 " <leader>L: show/close location list window
 function! LocListToggle()
-  let nr = winnr("$")
+  let nr = winnr('$')
   :lopen
-  let nr2 = winnr("$")
+  let nr2 = winnr('$')
   if nr == nr2 | lclose | endif
 endfunction
 map  <silent> <leader>L :call LocListToggle()<CR>
@@ -407,14 +423,12 @@ nmap <silent> <leader><space> :noh<CR>
 
 " Plugin ag.vim
 " <leader>ag (or rg): Ag (search file contents)
-nnoremap <leader>ag :Ag! -i ""<Left>
-xnoremap <silent> <leader>ag y:Ag <C-R>"<CR>
-nnoremap <leader>rg :Ag! -i ""<Left>
-xnoremap <silent> <leader>rg y:Ag <C-R>"<CR>
+nnoremap <leader>ag           :Ag! -i ""<Left>
+xnoremap <silent> <leader>ag  y:Ag <C-R>"<CR>
 
-if executable("rg")
+if executable('rg')
   " Use ripgrep instead :)
-  let g:ag_prg="rg --no-heading --vimgrep"
+  let g:ag_prg = 'rg --no-heading --vimgrep'
 endif
 
 
@@ -423,7 +437,7 @@ function! s:cd()
   cd %:p:h
 
   " if NERDTree is open, chdir NERDTree as well
-  if exists("g:NERDTree") && g:NERDTree.IsOpen()
+  if exists('g:NERDTree') && g:NERDTree.IsOpen()
     :NERDTreeCWD | wincmd w
   endif
 endfunction
@@ -446,6 +460,9 @@ noremap <leader>p "*p
 
 " <leader>w : save
 nnoremap <leader>w :w!<CR>
+
+" <leader>q : quit/close window
+nnoremap <silent> <leader>q :q<CR>
 
 " <leader>S : Strip trailing whitespaces
 command! -nargs=0 Strip call StripTrailingWhitespaces()
@@ -513,7 +530,7 @@ xnoremap <leader>! "gy:call <SID>goog(@g, 1)<cr>gv
 " color settings
 " @see http://www.calmar.ws/vim/256-xterm-24bit-rgb-color-chart.html
 set t_Co=256                 " use 256 color
-set bg=dark
+set background=dark
 
 if &term =~ '256color'
     " Disable Background Color Erase (BCE) so that color schemes
@@ -524,7 +541,7 @@ endif
 " 24-bit true color: neovim 0.1.5+ / vim 7.4.1799+
 " enable ONLY if TERM is set valid and it is NOT under mosh
 function! s:is_mosh()
-  let output = system("is_mosh -v")
+  let output = system('is_mosh -v')
   if v:shell_error
     return 0
   endif
@@ -532,7 +549,7 @@ function! s:is_mosh()
 endfunction
 
 function! s:auto_termguicolors()
-  if !(has("termguicolors"))
+  if !(has('termguicolors'))
     return
   endif
 
@@ -546,13 +563,13 @@ call s:auto_termguicolors()
 
 
 " apply base theme
-" silent! colorscheme xoria256
+ silent! colorscheme xoria256
 
 " airline theme: status line and tab line
-if has("termguicolors") && &termguicolors
-  let g:airline_theme='deus'
+if has('termguicolors') && &termguicolors
+  let g:airline_theme = 'deus'
 else
-  let g:airline_theme='bubblegum'
+  let g:airline_theme = 'bubblegum'
 endif
 
 
@@ -608,11 +625,12 @@ au BufRead,BufNewFile *.prototxt if &ft == '' | setfiletype yaml | endif
 au BufRead,BufNewFile *.ipynb if &ft == '' | setfiletype json | endif
 
 autocmd FileType git setlocal foldlevel=1
+autocmd FileType gitcommit setlocal cc=72 textwidth=72
 
 " remove trailing whitespaces on save
 fun! StripTrailingWhitespaces()
-    let l = line(".")
-    let c = col(".")
+    let l = line('.')
+    let c = col('.')
     %s/\s\+$//e
     call cursor(l, c)
 endfun
@@ -622,13 +640,18 @@ autocmd FileType c,cpp,java,javascript,html,ruby,python,pandoc
 
 " highlight trailing whitespaces
 highlight ExtraWhitespace ctermbg=red guibg=red
-autocmd FileType GV highlight clear ExtraWhitespace
+autocmd FileType GV,gitmessengerpopup highlight clear ExtraWhitespace
 
 match ExtraWhitespace /\s\+$/
-autocmd BufWinEnter * match ExtraWhitespace /\s\+$/
-autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
-autocmd InsertLeave * match ExtraWhitespace /\s\+$/
-autocmd BufWinLeave * call clearmatches()
+
+augroup trailing_whitespaces
+  autocmd!
+  autocmd FileType GV,gitmessengerpopup highlight clear ExtraWhitespace
+  autocmd BufWinEnter * match ExtraWhitespace /\s\+$/
+  autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
+  autocmd InsertLeave * match ExtraWhitespace /\s\+$/
+  autocmd BufWinLeave * call clearmatches()
+augroup END
 
 " Unset paste when leaving insert mode
 autocmd InsertLeave * silent! set nopaste
@@ -644,9 +667,9 @@ endif
 
 " http://vim.wikia.com/wiki/Identify_the_syntax_highlighting_group_used_at_the_cursor
 function! ShowSyntaxGroup()
-    echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> trans<'
-        \ . synIDattr(synID(line("."),col("."),0),"name") . "> lo<"
-        \ . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . ">"
+    echo 'hi<' . synIDattr(synID(line('.'),col('.'),1),'name') . '> trans<'
+        \ . synIDattr(synID(line('.'),col('.'),0),'name') . '> lo<'
+        \ . synIDattr(synIDtrans(synID(line('.'),col('.'),1)),'name') . '>'
 endfunction
 
 noremap <leader>syn :call ShowSyntaxGroup()<cr>
@@ -657,31 +680,31 @@ noremap <leader>syn :call ShowSyntaxGroup()<cr>
 """""""""""""""""""""""""""""""""""""""""
 
 " gui settings
-if has("gui_running")
+if has('gui_running')
 
-    if has("unix")
-        let s:uname = substitute(system("uname -s"), '\n', '', '')
-    endif
+  if has('unix')
+    let s:uname = substitute(system('uname -s'), '\n', '', '')
+  endif
 
-    if has("gui_win32")
-        language mes en         " use english messages (korean characters broken)
-        set langmenu=none       " use english context menus (korean characters broken)
-        set guioptions-=T       " exclude toolbar
-        set guioptions-=m       " exclude menubar
+  if has('gui_win32')
+    language mes en         " use english messages (korean characters broken)
+    set langmenu=none       " use english context menus (korean characters broken)
+    set guioptions-=T       " exclude toolbar
+    set guioptions-=m       " exclude menubar
 
-        " font setting for windows
-        set guifont=Consolas:h11:cANSI
-        set guifontwide=GulimChe:h12:cDEFAULT
+    " font setting for windows
+    set guifont=Consolas:h11:cANSI
+    set guifontwide=GulimChe:h12:cDEFAULT
 
-    elseif has("gui_gtk2")
-        " font setting for Ubuntu linux (GTK)
-        set guifont=Ubuntu\ Mono\ derivative\ Powerline\ 12
+  elseif has('gui_gtk2')
+    " font setting for Ubuntu linux (GTK)
+    set guifont=Ubuntu\ Mono\ derivative\ Powerline\ 12
 
-    elseif has("unix") && s:uname == "Darwin"
-        " font setting for Mac OS X (Darwin)
-        set guifont=Monaco\ for\ Powerline:h12
-        set guifontwide=Apple\ SD\ Gothic\ Neo\ UltraLight:h12
-    endif
+  elseif has('unix') && s:uname ==? 'Darwin'
+    " font setting for Mac OS X (Darwin)
+    set guifont=Monaco\ for\ Powerline:h12
+    set guifontwide=Apple\ SD\ Gothic\ Neo\ UltraLight:h12
+  endif
 
 endif
 
@@ -740,11 +763,20 @@ xnoremap <leader>emoji :Emoji<CR>
 " ---------------------------------------------------------------- }}}
 " vim-asterisk (enhanced *) {{{
 
-"' Use z (stay) behavior as default
-map *  <Plug>(asterisk-z*)
-map #  <Plug>(asterisk-z#)
-map g* <Plug>(asterisk-gz*)
-map g# <Plug>(asterisk-gz#)
+" Use z (stay) behavior as default
+if has_key(g:plugs, 'vim-asterisk')
+  "map *  <Plug>(asterisk-z*)
+  "map #  <Plug>(asterisk-z#)
+  map g* <Plug>(asterisk-gz*)
+  map g# <Plug>(asterisk-gz#)
+endif
+" Use z (stay) behavior as default
+if has_key(g:plugs, 'vim-asterisk')
+  map *  <Plug>(asterisk-z*)
+  map #  <Plug>(asterisk-z#)
+  map g* <Plug>(asterisk-gz*)
+  map g# <Plug>(asterisk-gz#)
+endif
 
 " Keep cursor position across matches
 let g:asterisk#keeppos = 1
@@ -824,6 +856,17 @@ let g:EditorConfig_core_mode = 'python_external'
 " use airline, with powerline-ish theme
 let g:airline_powerline_fonts=1
 
+" [section customization] (:h airline-sections) {{{
+" -----------------------
+
+" section y (ffenc): skip if utf-8[unix]
+let g:airline#parts#ffenc#skip_expected_string = 'utf-8[unix]'
+
+" section z: current position, but more concisely
+let g:airline_section_z = 'L%3l:%v'
+
+" }}}
+
 " enable tabline feature
 let g:airline#extensions#tabline#enabled = 1
 
@@ -849,17 +892,23 @@ function! s:OnNeomakeFinished(context)
   let l:context = g:neomake_hook_context
 
   " If there is any failed job (non-zero exit code), notify it.
-  let l:failure_message = ""
+  let l:failure_message = ''
   for job in l:context['finished_jobs']
     if l:job['exit_code'] != 0
-      let l:failure_message = printf("%s%s ", l:failure_message, l:job['as_string']())
+      let l:failure_message = printf('%s%s ', l:failure_message, l:job['as_string']())
     endif
   endfor
   if ! empty(l:failure_message)
-    echom "Job Finished, FAIL: " . l:failure_message
+    echom 'Job Finished, FAIL: ' . l:failure_message
     copen | wincmd p   " copen, but not move to the quickfix window
   else
-    echom "Job Finished, Success."
+    echom 'Job Finished, Success.'
+    if get(b:, 'neomake_auto_copen', 0) == 1
+      " if quickfix list is opened automatically by neomake callback,
+      " we should automatically close it upon the success of neomake job.
+      silent cclose
+      let b:neomake_auto_copen = 0
+    endif
   endif
 endfunction
 
@@ -876,9 +925,9 @@ augroup END
 
 " Inside vim, set environment variable FZF_DEFAULT_COMMAND
 " so that it can list the files by 'git ls-files' or 'ag'.
-if executable("ag")
-    "let $FZF_DEFAULT_COMMAND = '(git ls-files ":/" || ag -l -g "") | LC_COLLATE=C sort | uniq  2> /dev/null'
-    let $FZF_DEFAULT_COMMAND = 'ag -l -g "" 2> /dev/null'
+if executable('ag')
+  "let $FZF_DEFAULT_COMMAND = '(git ls-files ":/" || ag -l -g "") | LC_COLLATE=C sort | uniq  2> /dev/null'
+  let $FZF_DEFAULT_COMMAND = 'ag -l -g "" 2> /dev/null'
 endif
 
 " Customize built-in commands of 'vim-fzf' (overriden by commands here) {{{
@@ -894,12 +943,12 @@ command! -bang -nargs=? GFiles     call fzf#vim#gitfiles(<q-args>, <q-args> != '
 
 " :F is a shortcut for :GFiles or :FZF
 function! s:fzf_smart()
-    let l:git_dir = fugitive#extract_git_dir(expand('%:p'))
-    " in a git repo, invoke :GFiles (plus untracked files)
-    if ! empty(l:git_dir) | GFiles -c -o --exclude-standard
-    " not in git repo, invoke :FZF by fallback
-    else | FZF
-    endif
+  let l:git_dir = fugitive#extract_git_dir(expand('%:p'))
+  " in a git repo, invoke :GFiles (plus untracked files)
+  if ! empty(l:git_dir) | GFiles -c -o --exclude-standard
+  " not in git repo, invoke :FZF by fallback
+  else | FZF
+  endif
 endfunction
 command! -nargs=0 F call s:fzf_smart()
 
@@ -924,23 +973,28 @@ command! -bang -nargs=* Rg
   \           : fzf#vim#with_preview('right:50%', '?'),
   \ <bang>0)
 
+nnoremap <leader>rg   :Rg ''<Left>
+xnoremap <leader>rg   "gy:Rg <C-R>g<CR>
+
 " :Def, Rgdef -- Easily find definition/declaration (requires ripgrep)
 " e.g. :Def class, :Def def, :Def myfunc, :Def class MyClass
 command! -bang -nargs=* Rgdef   call s:fzf_rgdef(<q-args>, <bang>0)
 command! -bang -nargs=* Def     call s:fzf_rgdef(<q-args>, <bang>0)
+command! -bang -nargs=* D       call s:fzf_rgdef(<q-args>, <bang>0)
+nnoremap <leader>def  :<C-U>Def<CR>
 
 function! s:fzf_rgdef(args, bang0)
-    " TODO: currently, only python is supported.
-    let l:rgdef_type = '--type "py"'
-    let l:rgdef_prefix = '^\s*(def|class)'
-    let l:rgdef_pattern = l:rgdef_prefix.' \w*'.a:args.'\w*'
+  " TODO: currently, only python is supported.
+  let l:rgdef_type = '--type "py"'
+  let l:rgdef_prefix = '^\s*(def|class)'
+  let l:rgdef_pattern = l:rgdef_prefix.' \w*'.a:args.'\w*'
 
-    " if the query itself starts with prefix patterns, let itself be the regex pattern
-    if a:args =~ ('\v'.l:rgdef_prefix.'($|\s+)')
-      let l:rgdef_pattern = '^\s*'.a:args
-    endif
+  " if the query itself starts with prefix patterns, let itself be the regex pattern
+  if a:args =~ ('\v'.l:rgdef_prefix.'($|\s+)')
+    let l:rgdef_pattern = '^\s*'.a:args
+  endif
 
-    call fzf#vim#grep(
+  call fzf#vim#grep(
   \   'rg -i --column --line-number --no-heading --color=always '.l:rgdef_type.' '.shellescape(l:rgdef_pattern), 1,
   \   a:bang0 ? fzf#vim#with_preview('up:60%')
   \           : fzf#vim#with_preview('right:50%', '?'),
@@ -951,28 +1005,39 @@ endfunction
 
 " :Z -- cd to recent working directories using fasd
 command! -nargs=* Z call fzf#run
-            \({
-            \ 'source':  printf('fasd -Rdl "%s"',
-            \                   escape(empty(<q-args>) ? '' : <q-args>, '"\')),
-            \ 'options': '-1 -0 --no-sort +m',
-            \ 'down':    '~33%',
-            \ 'sink':    'NERDTree'
-            \})
+      \({
+      \ 'source':  printf('fasd -Rdl "%s"',
+      \                   escape(empty(<q-args>) ? '' : <q-args>, '"\')),
+      \ 'options': '-1 -0 --no-sort +m',
+      \ 'down':    '~33%',
+      \ 'sink':    'NERDTree'
+      \})
 
 " :Plugs -- list all vim plugins and open the directory of the selected
 command! -nargs=* Plugs call fzf#run
-            \({
-            \ 'source':  map(sort(keys(g:plugs)), 'g:plug_home . "/" . v:val'),
-            \ 'options': '--delimiter "/" --nth -1' . printf(' --query "%s"', <q-args>),
-            \ 'down':    '~33%',
-            \ 'sink':    'NERDTree'
-            \})
+      \({
+      \ 'source':  map(sort(keys(g:plugs)), 'g:plug_home . "/" . v:val'),
+      \ 'options': '--delimiter "/" --nth -1' . printf(' --query "%s"', <q-args>),
+      \ 'down':    '~33%',
+      \ 'sink':    'NERDTree'
+      \})
+
+" :SitePackages -- quickly jump to the site-packages directory for the current python
+command! -nargs=* SitePackages call fzf#run
+      \({
+      \ 'source':  ('python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())" ' .
+      \             ' | xargs -I{} find {}/ -maxdepth 1 -type d ' .
+      \             ' | grep -v "\(dist\|egg\)-info$" | grep -v "\.egg$" | sort'),
+      \ 'options': '--delimiter "/" --nth -1 +m ' . printf(' --query "%s"', <q-args>),
+      \ 'down':    '~33%',
+      \ 'sink':    'NERDTree',
+      \})
 
 " Leader key mappings for vim-fzf commands
 
 " List all open buffers
 nnoremap <leader>FB :Buffers<CR>
-nnoremap <leader>B :Buffers<CR>
+nnoremap <leader>B  :Buffers<CR>
 " :B goes to :Buffers
 command! B Buffers
 " Tags in the current buffer (see tagbar)
@@ -981,7 +1046,7 @@ nnoremap <leader>FT :BTags<CR>
 nnoremap <leader>FG :Commits<CR>
 " History (recently opened files)
 nnoremap <leader>FH :History<CR>
-nnoremap <leader>H :History<CR>
+nnoremap <leader>H  :History<CR>
 " :GS -> Git status (open modified file, etc.)
 command! GS GFiles?
 " :H goes to :History
@@ -1001,11 +1066,12 @@ xnoremap <leader>/ "gy:Dash <c-r>g<cr>gv
 
 " Use 'omnicomplete' as the default completion type.
 " It may fallback to default keyword completion (<C-P>).
-let g:SuperTabDefaultCompletionType = "<C-X><C-O>"
+let g:SuperTabDefaultCompletionType = '<C-X><C-O>'
 
 " sometimes we may want to insert tabs or spaces for indentation.
 " no tab completion at the start of line or after whitespace.
 let g:SuperTabNoCompleteAfter = ['^', '\s']
+
 
 " ---------------------------------------------------------------- }}}
 " NerdTree {{{
@@ -1065,15 +1131,15 @@ nmap ga <Plug>(EasyAlign)
 
 " ---------------------------------------------------------------- }}}
 " UltiSnips {{{
-let g:UltiSnipsExpandTrigger="<c-j>"
-let g:UltiSnipsJumpForwardTrigger="<c-j>"
-let g:UltiSnipsJumpBackwardTrigger="<c-k>"
+let g:UltiSnipsExpandTrigger = '<c-j>'
+let g:UltiSnipsJumpForwardTrigger = '<c-j>'
+let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
 
 " ---------------------------------------------------------------- }}}
 " vim-pandoc {{{
 
 " disable automatic folding
-let g:pandoc#modules#disabled = ["folding"]
+let g:pandoc#modules#disabled = ['folding']
 
 " disable conceals
 let g:pandoc#syntax#conceal#use = 0
@@ -1086,11 +1152,18 @@ let g:pandoc#spell#enabled = 0
 autocmd FileType java setlocal omnifunc=javacomplete#Complete
 
 " ---------------------------------------------------------------- }}}
+" vim-verdict {{{
+
+" cooperative mode required to make it work with coc.nvim, YCM, etc.
+let g:Verdin#cooperativemode = 1
+
+" ---------------------------------------------------------------- }}}
 " echodoc.vim {{{
 let g:echodoc#enable_at_startup = 1
 
 " ---------------------------------------------------------------- }}}
 " deoplete.nvim {{{
+let g:python_host_prog="/usr/bin/python3.6"
 let g:deoplete#enable_at_startup = 1
 
 
@@ -1162,12 +1235,13 @@ hi ALEWarningSign  gui=bold guifg=#b1b14d ctermfg=143
 " no highlight (underline) on detected errors/warnings
 let g:ale_set_highlights = 0
 
-" Show the number of errors/warnings in the airline statusbar
+" :h airline-ale
 let g:airline#extensions#ale#enabled = 1
+let g:airline#extensions#ale#show_line_numbers = 0
 
-" Suppress a warning for the conflict with Neomake
-" Neomake is used for job execution, not a lint engine, so it would
-" be fine.
+" Suppress a warning for the conflict with Neomake.
+" Neomake is used for job execution, not as a lint engine,
+" so it would be fine.
 let g:ale_emit_conflict_warnings = 0
 
 " ---------------------------------------------------------------- }}}
@@ -1198,7 +1272,7 @@ endif
 
 " lint (code checking):
 " disable in favor of ALE, but only if pylint/pycodestyle exists
-let s:py_linters_exists = executable("pylint") || executable("pycodestyle")
+let s:py_linters_exists = executable('pylint') || executable('pycodestyle')
 if has_key(g:plugs, 'ale') && s:py_linters_exists
     let g:pymode_lint = 0
 endif
@@ -1214,7 +1288,7 @@ let g:pymode_lint_cwindow = 0
 " see also ~/.config/pycodestyle (for ALE)
 "  E401 : multiple imports on one line
 "  E501 : line too long
-let g:pymode_lint_ignore = ["E401", "E501"]
+let g:pymode_lint_ignore = ['E401', 'E501']
 
 
 " For neovim or vim8 (completor.vim),
@@ -1223,7 +1297,7 @@ let g:pymode_lint_ignore = ["E401", "E501"]
 if has_key(g:plugs, 'deoplete-jedi') || has_key(g:plugs, 'completor.vim')
             \ || has_key(g:plugs, 'coc.nvim')
     " @see https://github.com/zchee/deoplete-jedi/issues/35
-    let g:jedi#completions_enabled = 0
+    let g:jedi#completions_enabled = 1
 endif
 
 " Make jedi's completeopt not to include 'longest',
@@ -1258,13 +1332,23 @@ endif
 
 
 if isdirectory('/usr/include/clang')
-    let g:deoplete#sources#clang#clang_header = '/usr/include/clang/'
+  let g:deoplete#sources#clang#clang_header = '/usr/include/clang/'
 elseif isdirectory('/Library/Developer/CommandLineTools/usr/lib/clang/')
-    let g:deoplete#sources#clang#clang_header = '/Library/Developer/CommandLineTools/usr/lib/clang/'
+  let g:deoplete#sources#clang#clang_header = '/Library/Developer/CommandLineTools/usr/lib/clang/'
 endif
 
 " ---------------------------------------------------------------- }}}
 " LaTeX {{{
+
+let g:vimtex_syntax_enabled = 1
+
+" Always prefer latex instead of plain, etc.
+let g:tex_flavor = 'latex'
+
+let g:vimtex_syntax_enabled = 1
+
+" Always prefer latex instead of plain, etc.
+let g:tex_flavor = "latex"
 
 let g:LatexBox_Folding = 1
 
@@ -1275,17 +1359,17 @@ let g:vimtex_mappings_enabled = 1
 
 " Disable callback feature if vim lacks feature +clientserver
 if ! (has('clientserver') || has('nvim'))
-    let g:vimtex_latexmk_callback = 0
+  let g:vimtex_latexmk_callback = 0
 
-    " see https://github.com/lervag/vimtex/issues/507
-    let g:vimtex_compiler_latexmk = {'callback' : 0}
+  " see https://github.com/lervag/vimtex/issues/507
+  let g:vimtex_compiler_latexmk = {'callback' : 0}
 endif
 
 " in macOS, use Skim as the default LaTeX PDF viewer (for vimtex)
 " for :Vimtexview, move Skim's position to where the cursor currently points to.
 if has('mac')
-    let g:vimtex_view_general_viewer = '/Applications/Skim.app/Contents/SharedSupport/displayline'
-    let g:vimtex_view_general_options = '-r -g @line @pdf @tex'
+  let g:vimtex_view_general_viewer = '/Applications/Skim.app/Contents/SharedSupport/displayline'
+  let g:vimtex_view_general_options = '-r -g @line @pdf @tex'
 endif
 
 " ---------------------------------------------------------------- }}}
@@ -1318,6 +1402,20 @@ nmap <leader>ha  <Plug>GitGutterStageHunk
 nmap <leader>hh  :GitGutterLineHighlightsToggle<CR>
 
 " ---------------------------------------------------------------- }}}
+" git-messenger {{{
+
+" map <C-O>/<C-I> to jumping to older and Older(recent) commits,
+" respectively (see git-messenger#3)
+augroup git_messenger_autocmd
+  autocmd!
+  autocmd FileType gitmessengerpopup nmap <buffer> <C-O> o
+  autocmd FileType gitmessengerpopup nmap <buffer> <C-I> O
+augroup END
+
+" Display content diff as well in the popup window
+let g:git_messenger_include_diff = 'current'
+
+" ---------------------------------------------------------------- }}}
 " gundo key mappings and options {{{
 let g:gundo_right = 1   " show at right
 nnoremap <leader>G :GundoToggle<CR>
@@ -1327,30 +1425,56 @@ nnoremap <leader>G :GundoToggle<CR>
 nnoremap <leader>T :TagbarToggle<CR>
 
 " ---------------------------------------------------------------- }}}
-" coc.nvim (languag server completion) {{{
+" coc.nvim (language server completion) {{{
 
 if has_key(g:plugs, 'coc.nvim')
 
   " For general settings, try :CocConfig
   " (or ~/.config/nvim/coc-settings.json)
-  au BufRead coc-settings.json    syntax match Comment +\/\/.\+$+
+  au BufRead coc-settings.json    set ft=jsonc
 
-  if has('nvim-0.4.0')
-    " coc.nvim is being actively developed and changing;
-    " Prefer a compiled code instead of a prebuilt binary
-    let g:coc_force_debug = 1
-  endif
+  " Appearance and highlight groups  (see also: NormalFloat)
+  highlight CocFloating       ctermbg=236 guibg=#292c3a
 
-  " Use <c-space> for trigger coc completion (rather than omnicomplete)
-  inoremap <silent><expr> <c-space> coc#refresh()
+  " <C-space> trigger/refresh completion popup menu, or show again signature help window
+  inoremap <expr><silent> <c-space>
+        \ pumvisible() ? coc#refresh() :
+        \ "<c-\><c-o>:call CocActionAsync('showSignatureHelp')<CR>"
+  nnoremap <silent> <c-space>
+        \ :call CocActionAsync('showSignatureHelp')<CR>
 
   " Use <cr> for confirm completion, `<C-g>u` means break undo chain at current position.
   " Coc only does snippet and additional edit on confirm.
   inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 
+  " If coc.nvim is available, supertab would have been disabled/unplugged
+  if !has_key(g:plugs, 'supertab') && has_key(g:plugs, 'coc.nvim')
+    " Use <tab> for trigger completion with characters ahead and navigate.
+    inoremap <silent><expr> <TAB>
+          \ pumvisible() ? "\<C-n>" :
+          \ <SID>check_back_space() ? "\<TAB>" :
+          \ coc#refresh()
+    inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+    function! s:check_back_space() abort
+      let col = col('.') - 1
+      return col == 0 || getline('.')[col - 1] =~# '\s'
+    endfunction
+  endif
+
+
+
+  " [Custom keymappings] see plugin/coc.vim
+
   " Go to definitions
-  noremap <silent> <F3> :<C-u>call CocActionAsync('jumpDefinition')<CR>
-  command! -nargs=0 CocJumpDefinition :CocActionAsync('jumpDefinition')
+  noremap <F3> :<C-u>call CocAction('jumpDefinition')<CR>
+  command! -nargs=0 CocJumpDefinition :call CocAction('jumpDefinition')
+  command! -nargs=0 JumpDefinition :call CocAction('jumpDefinition')
+
+  " Remap keys for gotos
+  nmap <silent> gd <Plug>(coc-definition)
+  nmap <silent> gr <Plug>(coc-references)
+  nmap <silent> gy <Plug>(coc-type-definition)
+  nmap <silent> gi <Plug>(coc-implementation)
 
   " Map 'K' for showing documentation in preview window
   " Use command ':verbose map K' to make sure it does not have conflict
@@ -1368,8 +1492,47 @@ if has_key(g:plugs, 'coc.nvim')
   command! -nargs=0 CocExtensions :CocList extensions
   command! -nargs=0 CocSnippets :CocList snippets
 
-endif
+  " Automatic formatting (selected range or entire buffer)
+  command! -range=% CocFormat    :call CocActionAsync('formatSelected', visualmode())
+  command! -range=% Format       :<line1>,<line2>CocFormat
+  xmap <silent> <leader>f        <Plug>(coc-format-selected)
 
+  " Display coc.nvim status message in the command line
+  let g:coc_suppress_status_delay = 2000
+  hi CocStatusCommandLine  ctermfg=240 guifg=#585858
+  augroup coc_status_change
+    autocmd!
+    autocmd User CocStatusChange call s:coc_show_status_commandline()
+    if exists('##CmdlineLeave')
+      " if user enters a command line, suppress coc status for a short moment
+      autocmd CmdlineEnter * call s:coc_suppress_status_switch(1)
+      autocmd CmdlineLeave * call s:coc_suppress_status_switch(1)
+    endif
+  augroup END
+
+  let s:carriage_return = nr2char(13)  " 0x13 (^M)
+  function! s:coc_show_status_commandline()
+    if get(s:, 'coc_suppress_status_commandline', 0)
+      return
+    endif
+    let l:status = trim(get(g:, 'coc_status', ''))
+    if empty(l:status) | echon '' | return | endif
+    echohl CocStatusCommandLine
+    echon  s:carriage_return . '[coc.nvim] ' . l:status
+    echohl NONE
+  endfunction
+  function! s:coc_suppress_status_switch(value)
+    let s:coc_suppress_status_commandline = a:value
+    if a:value
+      " when turning on, set a timer to automatically turn off in few seconds
+      if get(s:, 'coc_cmdline_timer', -1) >= 0
+        call timer_stop(s:coc_cmdline_timer)
+      endif
+      let s:coc_cmdline_timer = timer_start(g:coc_suppress_status_delay, {-> s:coc_suppress_status_switch(0)})
+    endif
+  endfunction
+
+endif
 
 " ---------------------------------------------------------------- }}}
 
@@ -1379,24 +1542,29 @@ endif
 """""""""""""""""""""""""""""""""""""""""
 
 " Use local vimrc if available
-if filereadable(expand("\~/.vimrc.local"))
-    source \~/.vimrc.local
+if filereadable(expand('~/.vimrc.local'))
+  source \~/.vimrc.local
 endif
 
 " }}}
 
+" vim: set ts=2 sts=2 sw=2 foldmethod=marker foldlevel=1:
+" vim: set ts=2 sts=2 sw=2:
 " vim: set ts=2 sts=2 sw=2:
 " custom vim settings
 "let g:airline_theme='triplejelly'
-:colorscheme monokai-phoenix
+":colorscheme jellybeans
+":colorscheme monokai-phoenix
 ":colorscheme kiss
 ":colorscheme dracula
 ":colorscheme xoria256
 ":colorscheme gruvbox
-autocmd BufRead *.py setlocal colorcolumn=0
+autocmd BufRead *.py setlocal colorcolumn=120
 autocmd FileType python setlocal foldmethod=indent
+autocmd FileType json :%!python -m json.tool
 nnoremap <leader>q :qa<CR>
 nnoremap <leader>wq :wqa<CR>
+nnoremap ee :
 " <C-r><C-w> pastes word with cursor-on
 nnoremap <leader>s :%s/\<<C-r><C-w>\>/
 nnoremap <leader>vs :%s/\%V
@@ -1404,12 +1572,18 @@ nnoremap <leader>bd :bd<CR>
 nnoremap <leader>e :e
 nnoremap ff /
 inoremap { {}<Esc>i
+inoremap " ""<Esc>i
 inoremap {} {}<Esc>a
 inoremap () ()<Esc>a
 inoremap {<Space> {}<Right>
+inoremap [<Space> []<Right>
+inoremap "<Space> ""<Right>
 inoremap ( ()<Esc>i
 inoremap (<Space> ()<Right>
 inoremap (<CR> ()<Esc>o
-set foldmethod=indent
 set nofoldenable
+set nu rnu
 command Diff execute 'w !git diff --no-index % -'
+
+"let g:pymode_python = 'python3'
+se wrap

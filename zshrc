@@ -1,4 +1,5 @@
 # .zshrc
+
 # ======
 # vim: set sts=2 sw=2 ts=2
 
@@ -59,6 +60,8 @@ if ! zgen saved; then
 
   # misc.
   zgen load wookayin/fzf-fasd
+  zgen load urbainvaes/fzf-marks
+
   zgen load zsh-users/zsh-autosuggestions
   if (( $+commands[virtualenvwrapper_lazy.sh] )); then
     zgen load MichaelAquilina/zsh-autoswitch-virtualenv
@@ -123,7 +126,8 @@ alias tn='tmux new -s '
 alias tk='tmux kill-session -t '
 alias ta='tmux attach -t '
 alias tf='source $HOME/.tensorflow/bin/activate'
-alias pt='source $HOME/.pytorch/bin/activate'
+alias pt2='source $HOME/.pytorch1.2_p27/bin/activate'
+alias pt3='source $HOME/.pytorch1.2_p36/bin/activate'
 alias de='deactivate'
 alias cde='conda deactivate'
 alias s='ls'
@@ -178,8 +182,6 @@ function recent {
                 linenum=${OPTARG}
                 ;;
             *)
-                #echo Invalid args!
-                #return
                 linenum=1
                 ;;
         esac
@@ -200,3 +202,16 @@ zle -N _findmax
 zle -N recent
 
 bindkey '^S' _git_status
+export CONFIG_PATH=/home/tony/cv_projects/proj_robust_recog/pipeline/config.json
+export TRAINING_SCRIPT_PATH=/home/tony/cv_projects/proj_robust_recog/pipeline/model/trainer.sh
+export VOC_TRAIN_IMAGE=/data/ssl-benchmark-output/voc07/train_images.npy
+export VOC_TRAIN_LABEL=/data/ssl-benchmark-output/voc07/train_labels.npy
+export VOC_VAL_IMAGE=/data/ssl-benchmark-output/voc07/val_images.npy
+export VOC_VAL_LABEL=/data/ssl-benchmark-output/voc07/val_labels.npy
+export VOC_TEST_IMAGE=/data/ssl-benchmark-output/voc07/test_images.npy
+export VOC_TEST_LABEL=/data/ssl-benchmark-output/voc07/test_labels.npy
+
+export CUB_IMAGE=/data/CUB_200_2011/images/
+export CUB_LABEL=/data/CUB_200_2011/labels/label_train_cub200_2011.csv
+
+export DISTORTED_CUB_IMAGE=/home/tony/JPEG2
